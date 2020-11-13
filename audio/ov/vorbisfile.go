@@ -99,8 +99,8 @@ func Clear(f *File) error {
 // returns the number of bytes read, the number of current logical bitstream and an error
 func Read(f *File, buffer unsafe.Pointer, length int, bigendianp bool, word int, sgned bool) (int, int, error) {
 
-	var cbigendianp C.int = 0
-	var csgned C.int = 0
+	var cbigendianp C.int
+	var csgned C.int
 	var bitstream C.int
 
 	if bigendianp {

@@ -16,7 +16,7 @@ type Plane struct {
 func NewPlane() *Plane {
 
 	p := new(Plane)
-	p.normal = *math32.NewVector3(0,0,1) //*normal
+	p.normal = *math32.NewVector3(0, 0, 1) //*normal
 	return p
 }
 
@@ -38,7 +38,10 @@ func (p *Plane) Normal() math32.Vector3 {
 func (p *Plane) BoundingBox() math32.Box3 {
 
 	//return math32.Box3{math32.Vector3{math32.Inf(-1), math32.Inf(-1), math32.Inf(-1)}, math32.Vector3{math32.Inf(1), 0, math32.Inf(1)}}
-	return math32.Box3{math32.Vector3{-1000, -1000, -1000}, math32.Vector3{1000, 1000, 0}}
+	return math32.Box3{
+		Min: math32.Vector3{X: -1000, Y: -1000, Z: -1000},
+		Max: math32.Vector3{X: 1000, Y: 1000, Z: 0},
+	}
 }
 
 // BoundingSphere computes and returns the bounding sphere of the analytical collision plane.
@@ -70,7 +73,7 @@ func (p *Plane) ProjectOntoAxis(localAxis *math32.Vector3) (float32, float32) {
 
 	if localAxis.Equals(&p.normal) {
 		return math32.Inf(-1), 0
-	} else {
-		return math32.Inf(-1), math32.Inf(1)
 	}
+
+	return math32.Inf(-1), math32.Inf(1)
 }

@@ -391,7 +391,7 @@ func CtxGetEnumValue(dev *Device, enumName string) uint32 {
 
 func CtxGetString(dev *Device, param uint) string {
 
-	var cdev *C.ALCdevice = nil
+	var cdev *C.ALCdevice
 	if dev != nil {
 		cdev = dev.cdev
 	}
