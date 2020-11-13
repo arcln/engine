@@ -8,6 +8,7 @@ package window
 
 import (
 	"fmt"
+
 	"github.com/g3n/engine/core"
 	"github.com/g3n/engine/gls"
 	"github.com/g3n/engine/util/logger"
@@ -34,7 +35,7 @@ type IWindow interface {
 	Gls() *gls.GLS
 	GetFramebufferSize() (width int, height int)
 	GetSize() (width int, height int)
-	GetScale() (x float64, y float64)
+	GetScale() (x float32, y float32)
 	CreateCursor(imgFile string, xhot, yhot int) (Cursor, error)
 	SetCursor(cursor Cursor)
 	DisposeAllCustomCursors()

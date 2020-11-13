@@ -194,8 +194,8 @@ type GlfwWindow struct {
 	lastY           int
 	lastWidth       int
 	lastHeight      int
-	scaleX          float64
-	scaleY          float64
+	scaleX          float32
+	scaleY          float32
 
 	// Events
 	keyEv    KeyEvent
@@ -240,6 +240,7 @@ func Init(width, height int, title string) error {
 	glfw.WindowHint(glfw.ContextVersionMajor, 3)
 	glfw.WindowHint(glfw.ContextVersionMinor, 3)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
+	glfw.WindowHint(glfw.ScaleToMonitor, glfw.True)
 	glfw.WindowHint(glfw.Samples, 8)
 	// Set OpenGL forward compatible context only for OSX because it is required for OSX.
 	// When this is set, glLineWidth(width) only accepts width=1.0 and generates an error
@@ -266,9 +267,7 @@ func Init(width, height int, title string) error {
 	}
 
 	// Compute and store scale
-	fbw, fbh := w.GetFramebufferSize()
-	w.scaleX = float64(fbw) / float64(width)
-	w.scaleY = float64(fbh) / float64(height)
+	w.scaleX, w.scaleY = w.GetContentScale()
 
 	// Create map for cursors
 	w.cursors = make(map[Cursor]*glfw.Cursor)
@@ -319,8 +318,9 @@ func Init(width, height int, title string) error {
 		xpos, ypos := x.GetCursorPos()
 		w.mouseEv.Button = MouseButton(button)
 		w.mouseEv.Mods = ModifierKey(mods)
-		w.mouseEv.Xpos = float32(xpos * w.scaleX)
-		w.mouseEv.Ypos = float32(ypos * w.scaleY)
+		// w.scaleX, w.scaleY = x.GetContentScale()
+		w.mouseEv.Xpos = float32(xpos) / w.scaleX
+		w.mouseEv.Ypos = float32(ypos) / w.scaleY
 		if action == glfw.Press {
 			w.Dispatch(OnMouseDown, &w.mouseEv)
 		} else if action == glfw.Release {
@@ -330,11 +330,9 @@ func Init(width, height int, title string) error {
 
 	// Set up window size callback to dispatch event
 	w.SetSizeCallback(func(x *glfw.Window, width int, height int) {
-		fbw, fbh := x.GetFramebufferSize()
-		w.sizeEv.Width = width
-		w.sizeEv.Height = height
-		w.scaleX = float64(fbw) / float64(width)
-		w.scaleY = float64(fbh) / float64(height)
+		// w.scaleX, w.scaleY = x.GetContentScale()
+		w.sizeEv.Width = int(float32(width) / w.scaleX)
+		w.sizeEv.Height = int(float32(height) / w.scaleY)
 		w.Dispatch(OnWindowSize, &w.sizeEv)
 	})
 
@@ -347,16 +345,16 @@ func Init(width, height int, title string) error {
 
 	// Set up window cursor position callback to dispatch event
 	w.SetCursorPosCallback(func(x *glfw.Window, xpos float64, ypos float64) {
-		w.cursorEv.Xpos = float32(xpos)
-		w.cursorEv.Ypos = float32(ypos)
+		w.cursorEv.Xpos = float32(xpos) / w.scaleX
+		w.cursorEv.Ypos = float32(ypos) / w.scaleY
 		w.cursorEv.Mods = w.mods
 		w.Dispatch(OnCursor, &w.cursorEv)
 	})
 
 	// Set up mouse wheel scroll callback to dispatch event
 	w.SetScrollCallback(func(x *glfw.Window, xoff float64, yoff float64) {
-		w.scrollEv.Xoffset = float32(xoff)
-		w.scrollEv.Yoffset = float32(yoff)
+		w.scrollEv.Xoffset = float32(xoff) * w.scaleX
+		w.scrollEv.Yoffset = float32(yoff) * w.scaleY
 		w.scrollEv.Mods = w.mods
 		w.Dispatch(OnScroll, &w.scrollEv)
 	})
@@ -414,7 +412,7 @@ func (w *GlfwWindow) Destroy() {
 }
 
 // Scale returns this window's DPI scale factor (FramebufferSize / Size)
-func (w *GlfwWindow) GetScale() (x float64, y float64) {
+func (w *GlfwWindow) GetScale() (x float32, y float32) {
 
 	return w.scaleX, w.scaleY
 }
